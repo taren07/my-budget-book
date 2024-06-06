@@ -27,12 +27,16 @@ export const useServerTimeLoader = routeLoader$(() => {
 export default component$(() => {
   useStyles$(styles);
   return (
-    <>
+    <div class="content-container">
       <Header />
-      <main>
-        <Slot />
-      </main>
-      <Footer />
-    </>
+      <div
+        class={"flex items-stretch gap-12 xl:gap-20"}
+        style={{ height: "calc(100vh - 80px)", marginTop: "80px" }}
+      >
+        <main class="flex-grow">
+          <Slot />
+        </main>
+      </div>
+    </div>
   );
 });
