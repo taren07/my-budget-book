@@ -1,9 +1,52 @@
 import { component$ } from "@builder.io/qwik";
-import { Form } from "@builder.io/qwik-city";
+import { Form, routeLoader$ } from "@builder.io/qwik-city";
+import {
+  formAction$,
+  InitialValues,
+  useForm,
+  valiForm$,
+} from "@modular-forms/qwik";
+import * as v from "valibot";
 
+// type InputForm = {
+//   earnings: number;
+//   date: Date;
+//   category: number;
+//   amount: number;
+//   memo: string;
+// };
 
+const InputSchema = v.object({
+  expense: v.string(),
+  income: v.string(),
+  date: v.pipe(v.string(), v.isoDate()),
+  category: v.string(),
+  amount: v.nullish(v.number()),
+  memo: v.string(),
+});
+
+type InputForm = v.InferInput<typeof InputSchema>;
+
+export const useFormLoader = routeLoader$<InitialValues<InputForm>>(() => ({
+  expense: "expense",
+  income: "",
+  date: new Date().toISOString(),
+  category: "",
+  amount: 0,
+  memo: "",
+}));
+
+export const useFormAction = formAction$<InputForm>((values) => {
+  // Runs on server
+}, valiForm$(InputSchema));
 
 export default component$(() => {
+  const [inputForm, { Form, Field }] = useForm<InputForm>({
+    loader: useFormLoader(),
+    action: useFormAction(),
+    validate: valiForm$(InputSchema),
+  });
+
   return (
     <div class="flex items-center justify-center">
       <div class="text-center">
@@ -15,12 +58,20 @@ export default component$(() => {
               <h5>収支</h5>
               <div class="flex gap-x-6">
                 <div class="flex">
-                  <input
-                    type="radio"
-                    name="hs-radio-group"
-                    class="mt-0.5 shrink-0 rounded-full border-gray-200 text-blue-600 focus:ring-blue-500 disabled:pointer-events-none disabled:opacity-50"
-                    id="hs-radio-group-1"
-                  />
+                  <Field name="expense">
+                    {(field, props) => (
+                      <div>
+                        <input
+                          type="radio"
+                          class="mt-0.5 shrink-0 rounded-full border-gray-200 text-blue-600 focus:ring-blue-500 disabled:pointer-events-none disabled:opacity-50"
+                          value={field.value}
+                          checked={field.value === "expense"}
+                          {...props}
+                        />
+                        {field.error && <div>{field.error}</div>}
+                      </div>
+                    )}
+                  </Field>
                   <label
                     for="hs-radio-group-1"
                     class="ms-2 text-sm text-gray-500"
@@ -30,12 +81,20 @@ export default component$(() => {
                 </div>
 
                 <div class="flex">
-                  <input
-                    type="radio"
-                    name="hs-radio-group"
-                    class="mt-0.5 shrink-0 rounded-full border-gray-200 text-blue-600 focus:ring-blue-500 disabled:pointer-events-none disabled:opacity-50"
-                    id="hs-radio-group-2"
-                  />
+                  <Field name="income">
+                    {(field, props) => (
+                      <div>
+                        <input
+                          type="radio"
+                          class="mt-0.5 shrink-0 rounded-full border-gray-200 text-blue-600 focus:ring-blue-500 disabled:pointer-events-none disabled:opacity-50"
+                          value={field.value}
+                          checked={field.value === "income"}
+                          {...props}
+                        />
+                        {field.error && <div>{field.error}</div>}
+                      </div>
+                    )}
+                  </Field>
                   <label
                     for="hs-radio-group-2"
                     class="ms-2 text-sm text-gray-500"
